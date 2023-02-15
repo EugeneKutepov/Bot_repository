@@ -11,7 +11,9 @@ MAX_COUNTER: int = 100
 
 offset: int = -2
 counter: int = 0
-chat_id: int
+#chat_id: int
+cat_response: requests.Response
+cat_link: str
 
 
 while counter < MAX_COUNTER:
