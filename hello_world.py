@@ -6,7 +6,7 @@ API_URL: str = 'https://api.telegram.org/bot'
 BOT_TOKEN: str = '6054779759:AAFoSpHEE13tJijeO1rsEtPoHzl9NhV0p50'
 
 offset: int = -2
-timeout: int = 60
+timeout: int = 10
 updates: dict
 
 
