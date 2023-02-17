@@ -23,8 +23,12 @@ def get_random_number() -> int:
     return random.randint(1, 100)
 
 
+def my_start_filter(message: Message) -> bool:
+    return message.text == '/start'
+
+
 # Этот хэндлер будет срабатывать на команду "/start"
-@dp.message(Command(commands=['start']))
+@dp.message(my_start_filter)
 async def process_start_command(message: Message):
     await message.answer('Привет!\nДавай сыграем в игру "Угадай число"?\n\n'
                          'Чтобы получить правила игры и список доступных '
