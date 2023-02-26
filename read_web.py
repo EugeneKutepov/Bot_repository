@@ -15,9 +15,18 @@ from bs4 import BeautifulSoup
 # используем парсер lxml
 #soup = BeautifulSoup(html_text, 'lxml')
 
-headers = {
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36',
-}
+from random import choice
 
-response = requests.get(url='http://httpbin.org/user-agent', headers=headers)
-print(response.text)
+url = 'http://httpbin.org/user-agent'
+
+# while line := open('user_agent.txt').read().split('\n'):
+#     user_agent = {'user-agent': choice(line)}
+#     response = requests.get(url=url, headers=user_agent)
+
+from fake_useragent import UserAgent
+ua = UserAgent()
+
+for x in range(10):
+    fake_ua = {'user-agent': ua.random}
+    response = requests.get(url=url, headers=fake_ua)
+    print(response.text)
