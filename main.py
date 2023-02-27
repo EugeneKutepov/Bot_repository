@@ -2,7 +2,7 @@ from environs import Env
 from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart, Text
 from aiogram.types import (KeyboardButton, Message, ReplyKeyboardMarkup,
-                           ReplyKeyboardRemove)
+                           ReplyKeyboardRemove, BotCommand)
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, KeyboardButtonPollType
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -12,35 +12,26 @@ env.read_env()  # Методом read_env() читаем файл .env и заг
 bot:Bot = Bot(env('BOT_TOKEN'))
 dp: Dispatcher = Dispatcher()
 
-# Инициализируем билдер
-kb_builder: ReplyKeyboardBuilder = ReplyKeyboardBuilder()
+# Создаем асинхронную функцию
+async def set_main_menu(bot: Bot):
 
-# Создаем кнопки
-contact_btn: KeyboardButton = KeyboardButton(
-                                text='Отправить телефон',
-                                request_contact=True)
-geo_btn: KeyboardButton = KeyboardButton(
-                                text='Отправить геолокацию',
-                                request_location=True)
-poll_btn: KeyboardButton = KeyboardButton(
-                                text='Создать опрос/викторину',
-                                request_poll=KeyboardButtonPollType())
+    # Создаем список с командами и их описанием для кнопки menu
+    main_menu_commands = [
+        BotCommand(command='/help',
+                   description='Справка по работе бота'),
+        BotCommand(command='/support',
+                   description='Поддержка'),
+        BotCommand(command='/contacts',
+                   description='Другие способы связи'),
+        BotCommand(command='/payments',
+                   description='Платежи')]
 
-# Добавляем кнопки в билдер
-kb_builder.row(contact_btn, geo_btn, poll_btn, width=1)
-
-# Создаем объект клавиатуры
-keyboard: ReplyKeyboardMarkup = kb_builder.as_markup(
-                                    resize_keyboard=True,
-                                    one_time_keyboard=True)
-
-
-# Этот хэндлер будет срабатывать на команду "/start"
-@dp.message(CommandStart())
-async def process_start_command(message: Message):
-    await message.answer(text='Экспериментируем со специальными кнопками',
-                         reply_markup=keyboard)
+    await bot.set_my_commands(main_menu_commands)
 
 
 if __name__ == '__main__':
+    # Регистрируем асинхронную функцию в диспетчере,
+    # которая будет выполняться на старте бота,
+    dp.startup.register(set_main_menu)
+    # Запускаем поллинг
     dp.run_polling(bot)
