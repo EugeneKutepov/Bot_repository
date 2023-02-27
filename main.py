@@ -2,7 +2,7 @@ from environs import Env
 from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart, Text
 from aiogram.types import (KeyboardButton, Message, ReplyKeyboardMarkup,
-                           ReplyKeyboardRemove, BotCommand)
+                           ReplyKeyboardRemove, BotCommand, InlineKeyboardButton, InlineKeyboardMarkup)
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, KeyboardButtonPollType
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -12,26 +12,27 @@ env.read_env()  # Методом read_env() читаем файл .env и заг
 bot:Bot = Bot(env('BOT_TOKEN'))
 dp: Dispatcher = Dispatcher()
 
-# Создаем асинхронную функцию
-async def set_main_menu(bot: Bot):
+# Создаем объекты инлайн-кнопок
+url_button_1: InlineKeyboardButton = InlineKeyboardButton(
+    text='Курс "Телеграм-боты на Python и AIOgram"',
+    url='https://stepik.org/120924')
+url_button_2: InlineKeyboardButton = InlineKeyboardButton(
+    text='Документация Telegram Bot API',
+    url='https://core.telegram.org/bots/api')
 
-    # Создаем список с командами и их описанием для кнопки menu
-    main_menu_commands = [
-        BotCommand(command='/help',
-                   description='Справка по работе бота'),
-        BotCommand(command='/support',
-                   description='Поддержка'),
-        BotCommand(command='/contacts',
-                   description='Другие способы связи'),
-        BotCommand(command='/payments',
-                   description='Платежи')]
+# Создаем объект инлайн-клавиатуры
+keyboard: InlineKeyboardMarkup = InlineKeyboardMarkup(
+    inline_keyboard=[[url_button_1],
+                     [url_button_2]])
 
-    await bot.set_my_commands(main_menu_commands)
+
+# Этот хэндлер будет срабатывать на команду "/start"
+# и отправлять в чат клавиатуру c url-кнопками
+@dp.message(CommandStart())
+async def process_start_command(message: Message):
+    await message.answer(text='Это инлайн-кнопки с параметром "url"',
+                         reply_markup=keyboard)
 
 
 if __name__ == '__main__':
-    # Регистрируем асинхронную функцию в диспетчере,
-    # которая будет выполняться на старте бота,
-    dp.startup.register(set_main_menu)
-    # Запускаем поллинг
     dp.run_polling(bot)
