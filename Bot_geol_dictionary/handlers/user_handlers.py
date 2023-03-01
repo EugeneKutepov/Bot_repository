@@ -23,11 +23,10 @@ async def process_help_command(message: Message):
 
 @router.message()
 async def process_yes_answer(message: Message):
-    kb = create_kb_answer(parse_term(message.text))
-    if kb:
+    kbs = create_kb_answer(parse_term(message.text))
+    for kb in kbs:
         await message.answer(text="Результаты поиска:", reply_markup=kb)
-    else:
-        await message.answer(text='Такого термина нет в словаре')
+
 
 @router.callback_query()
 async def process_buttons_press(callback: CallbackQuery):
