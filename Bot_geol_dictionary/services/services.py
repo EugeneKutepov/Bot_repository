@@ -6,8 +6,6 @@ line = open('user_agent.txt').read().split('\n')
 user_agent = {'user-agent': choice(line)}
 
 def read_direct_link(link:str):
-    print(link)
-
     url = f'https://www.vsegei.ru/ru/public/sprav/geodictionary/{link}'
     #print(url)
     html_text = requests.get(url, headers=user_agent).text
@@ -38,7 +36,7 @@ def parse_term(term):
             # read_direct_link(element['href'])
             # print(element['href'], element.text)
             links[element.text] = element['href']
-    print(links)
+    #print(links)
     return links
 
 

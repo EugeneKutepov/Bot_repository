@@ -31,5 +31,4 @@ async def process_yes_answer(message: Message):
 @router.callback_query()
 async def process_buttons_press(callback: CallbackQuery):
     answer = read_direct_link(callback.data)
-    #print(callback.value)
     await callback.message.answer(text=answer)
