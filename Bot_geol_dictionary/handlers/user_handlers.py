@@ -24,11 +24,15 @@ async def process_help_command(message: Message):
 @router.message()
 async def process_yes_answer(message: Message):
     kbs = create_kb_answer(parse_term(message.text))
-    for kb in kbs:
-        await message.answer(text="Результаты поиска:", reply_markup=kb)
+    if kbs:
+        for kb in kbs:
+            await message.answer(text="Результаты поиска:", reply_markup=kb)
+    else:
+        await message.answer(text="Результатов не найдено")
 
 
 @router.callback_query()
 async def process_buttons_press(callback: CallbackQuery):
     answer = read_direct_link(callback.data)
-    await callback.message.answer(text=answer)
+    for page in answer:
+        await callback.message.answer(text=page)

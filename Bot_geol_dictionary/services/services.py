@@ -5,6 +5,36 @@ from bs4 import BeautifulSoup
 line = open('user_agent.txt').read().split('\n')
 user_agent = {'user-agent': choice(line)}
 
+def _get_part_text(text: str, start: int, size = 4096) -> tuple[str, int]:
+    symbols = ",.!;:?"
+    if text:
+        text_edit = text[start:start+size]
+        for i in range(len(text_edit)-1, 0, -1):
+            if text_edit[i] in symbols:
+                try:
+                    if text[start+i+1] in symbols:
+                        i-=1
+                        pass
+                    else:
+                        text_edit = text_edit[:i+1]
+                        print(text_edit)
+                        return text_edit, len(text_edit)
+                except IndexError:
+                    text_edit = text[start:len(text)]
+                    return text_edit, len(text_edit)
+
+
+# Функция, формирующая словарь книги
+def prepare_message(text: str):
+    position = 0
+    norm_mes = []
+    while position < len(text)-1:
+        print(f'{len(text)}   {position}')
+        page = _get_part_text(text, position)
+        position += int(page[1])
+        norm_mes.append(page[0].lstrip())
+    return norm_mes
+
 def read_direct_link(link:str):
     url = f'https://www.vsegei.ru/ru/public/sprav/geodictionary/{link}'
     #print(url)
@@ -20,7 +50,8 @@ def read_direct_link(link:str):
         #     if 'ELEMENT_ID' in hrefs[i]:
         #         word = hrefs[i+1].split('><')[1][2:-3]
         #         wrref[word] = f'https://www.vsegei.ru{hrefs[i]}'
-        return element.text
+
+        return prepare_message(element.text)
         # print(element)
         # print(wrref)
         # print(element.text)
