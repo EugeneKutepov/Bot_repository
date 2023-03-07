@@ -7,7 +7,7 @@ user_agent = {'user-agent': choice(line)}
 
 def _get_part_text(text: str, start: int, size = 4096) -> tuple[str, int]:
     symbols = ",.!;:?"
-    if text:
+    if text and len(text)-1-start>size:
         text_edit = text[start:start+size]
         for i in range(len(text_edit)-1, 0, -1):
             if text_edit[i] in symbols:
@@ -17,11 +17,12 @@ def _get_part_text(text: str, start: int, size = 4096) -> tuple[str, int]:
                         pass
                     else:
                         text_edit = text_edit[:i+1]
-                        print(text_edit)
                         return text_edit, len(text_edit)
                 except IndexError:
                     text_edit = text[start:len(text)]
                     return text_edit, len(text_edit)
+    else:
+        return text[start:len(text)-1], len(text[start:len(text)-1])
 
 
 # Функция, формирующая словарь книги
@@ -29,7 +30,6 @@ def prepare_message(text: str):
     position = 0
     norm_mes = []
     while position < len(text)-1:
-        print(f'{len(text)}   {position}')
         page = _get_part_text(text, position)
         position += int(page[1])
         norm_mes.append(page[0].lstrip())
