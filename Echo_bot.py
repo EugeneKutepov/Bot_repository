@@ -1,64 +1,97 @@
-from typing import Text
-
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command, BaseFilter
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
-from aiogram.types import ContentType
-from aiogram import F
 
+# Вместо BOT TOKEN HERE нужно вставить токен вашего бота,
+# полученный у @BotFather
+BOT_TOKEN = '6054779759:AAE8JqMOb0O6BHmngBGjOyjXZoiKPAFVUNQ'
 
-API_TOKEN: str = '6054779759:AAFoSpHEE13tJijeO1rsEtPoHzl9NhV0p50'
-
-# Создаем объекты бота и диспетчера
-bot: Bot = Bot(token=API_TOKEN)
+bot: Bot = Bot(BOT_TOKEN)
 dp: Dispatcher = Dispatcher()
 
 
 # Этот хэндлер будет срабатывать на команду "/start"
+@dp.message(CommandStart())
 async def process_start_command(message: Message):
-    await message.answer('Привет!\nМеня зовут Эхо-бот!\nНапиши мне что-нибудь')
-
-
-# Этот фильтр будет проверять наличие неотрицательных чисел
-# в сообщении от пользователя, и передавать в хэндлер их список
-class NumbersInMessage(BaseFilter):
-    async def __call__(self, message: Message) -> bool | dict[str, list[int]]:
-        numbers = []
-        # Разрезаем сообщение по пробелам, нормализуем каждую часть, удаляя
-        # лишние знаки препинания и невидимые символы, проверяем на то, что
-        # в таких словах только цифры, приводим к целым числам
-        # и добавляем их в список
-        for word in message.text.split():
-            normalized_word = word.replace('.', '').replace(',', '').strip()
-            if normalized_word.isdigit():
-                numbers.append(int(normalized_word))
-        # Если в списке есть числа - возвращаем список по ключу 'numbers'
-        if numbers:
-            return {'numbers': numbers}
-        return False
-
-
-# Этот хэндлер будет срабатывать, если сообщение пользователя
-# начинается с фразы "найди числа" и в нем есть числа
-@dp.message(Text(startswith='найди числа', ignore_case=True),
-            NumbersInMessage())
-# Помимо объекта типа Message, принимаем в хэндлер список чисел из фильтра
-async def process_if_numbers(message: Message, numbers: list[int]):
     await message.answer(
-            text=f'Нашел: {str(", ".join(str(num) for num in numbers))}')
+            text='Привет!\n\nЯ бот, демонстрирующий '
+                 'как работает разметка. Отправь команду '
+                 'из списка ниже:\n\n'
+                 '/html - пример разметки с помощью HTML\n'
+                 '/markdownv2 - пример разметки с помощью MarkdownV2\n'
+                 '/noformat - пример с разметкой, но без указания '
+                 'параметра parse_mode')
 
 
-# Этот хэндлер будет срабатывать, если сообщение пользователя
-# начинается с фразы "найди числа", но в нем нет чисел
-@dp.message(Text(startswith='найди числа', ignore_case=True))
-async def process_if_not_numbers(message: Message):
+# Этот хэндлер будет срабатывать на команду "/help"
+@dp.message(Command(commands='help'))
+async def process_help_command(message: Message):
     await message.answer(
-            text='Не нашел что-то :(')
+            text='Я бот, демонстрирующий '
+                 'как работает разметка. Отправь команду '
+                 'из списка ниже:\n\n'
+                 '/html - пример разметки с помощью HTML\n'
+                 '/markdownv2 - пример разметки с помощью MarkdownV2\n'
+                 '/noformat - пример с разметкой, но без указания '
+                 'параметра parse_mode')
 
 
-# Регистрируем хэндлеры
-dp.message.register(process_start_command, Command(commands=["start"]))
-#dp.message.register(process_help_command, Command(commands=['help']))
+# Этот хэндлер будет срабатывать на команду "/html"
+@dp.message(Command(commands='html'))
+async def process_html_command(message: Message):
+    await message.answer(
+            text='Это текст, демонстрирующий '
+                 'как работает HTML-разметка:\n\n'
+                 '<b>Это жирный текст</b>\n'
+                 '<i>Это наклонный текст</i>\n'
+                 '<u>Это подчеркнутый текст</u>\n'
+                 '<span class="tg-spoiler">А это спойлер</span>\n\n'
+                 'Чтобы еще раз посмотреть список доступных команд - '
+                 'отправь команду /help',
+            parse_mode='HTML')
 
+
+# Этот хэндлер будет срабатывать на команду "/markdownv2"
+@dp.message(Command(commands='markdownv2'))
+async def process_markdownv2_command(message: Message):
+    await message.answer(
+            text='Это текст, демонстрирующий '
+                 'как работает MarkdownV2\-разметка:\n\n'
+                 '*Это жирный текст*\n'
+                 '_Это наклонный текст_\n'
+                 '__Это подчеркнутый текст__\n'
+                 '||А это спойлер||\n\n'
+                 'Чтобы еще раз посмотреть список доступных команд \- '
+                 'отправь команду /help',
+            parse_mode='MarkdownV2')
+
+
+# Этот хэндлер будет срабатывать на команду "/noformat"
+@dp.message(Command(commands='noformat'))
+async def process_noformat_command(message: Message):
+    await message.answer(
+            text='Это текст, демонстрирующий '
+                 'как отображается текст, если не указать '
+                 'параметр parse_mode:\n\n'
+                 '<b>Это мог бы быть жирный текст</b>\n'
+                 '_Это мог бы быть наклонный текст_\n'
+                 '<u>Это мог бы быть подчеркнутый текст</u>\n'
+                 '||А это мог бы быть спойлер||\n\n'
+                 'Чтобы еще раз посмотреть список доступных команд - '
+                 'отправь команду /help')
+
+
+# Этот хэндлер будет срабатывать на любые сообщения, кроме команд,
+# отлавливаемых хэндлерами выше
+@dp.message()
+async def send_echo(message: Message):
+    await message.answer(
+            text='Я даже представить себе не могу, '
+                 'что ты имеешь в виду\n\n'
+                 'Чтобы посмотреть список доступных команд - '
+                 'отправь команду /help')
+
+
+# Запускаем поллинг
 if __name__ == '__main__':
     dp.run_polling(bot)
