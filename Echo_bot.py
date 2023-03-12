@@ -1,69 +1,112 @@
-import random
-
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command, Text
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
-                           InlineKeyboardMarkup, Message)
-
+                           InlineKeyboardMarkup, InputMediaAudio,
+                           InputMediaDocument, InputMediaPhoto,
+                           InputMediaVideo, Message)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.filters import CommandStart, Text
+from aiogram.exceptions import TelegramBadRequest
 
 # Вместо BOT TOKEN HERE нужно вставить токен вашего бота,
 # полученный у @BotFather
-BOT_TOKEN = '6054779759:AAE8JqMOb0O6BHmngBGjOyjXZoiKPAFVUNQ'
+# BOT_TOKEN = 'BOT TOKEN HERE'
+
+
+BOT_TOKEN: str = '6054779759:AAE8JqMOb0O6BHmngBGjOyjXZoiKPAFVUNQ'
 
 bot: Bot = Bot(BOT_TOKEN)
 dp: Dispatcher = Dispatcher()
 
 
-jokes: dict[int, str] = {
-    1: 'с хабра, описание фильмов Матрица\n\nСудя по всему, в городе машин либо очень либеральный мэр, либо очень криворукие сисадмины. Иначе как объяснить, что свободные люди беспрепятственно подключаются к вражеской ИТ-системе? Причем удаленно из тарантаса, летающего по канализации! Т.е. мало того, что у машин в сточных трубах развернут высокоскоростной Wi-Fi, так они еще и пускают в свою сеть всех подряд, позволяя неавторизованным пользователям получать данные из системы, вносить в нее изменения и общаться между собой. Красота!',
-    2: '- У меня на одном курсе был фин, он приехал к нам т.к. был очарован культурой гопников. Он хотел проникнуться ею у первоисточника и подтянуть мат. И вот где-то в Питере он припал к истокам, все-все выучил и загорелся желанием принести культуру другим иностранцам группы. А там были бразильцы, немцы итальянцы, французы и китаец. И вот захожу как-то я в группу и там хором повторяют слова "ъуъ" и "съка" с шестью разными акцентами.\n- Хотелось бы послушать, как они говорили "ъуъ"',
-    3: 'Я в восторге от наших учителей.\nСыну в школе дали домашнее задание, где, среди прочего, был вопрос "как связаны буква А4 и бык?"\nРассказал ему про финикийский алфавит, как первую фонетическую письменность. Что там была буква "алеф", очень похожая на нашу современную "А", и что слово "алеф" означало "бык". Что, возможно, букву так назвали, потому что если развернуть ее, то она похожа на морду быка с рогами.\nЕще очень радовался, что детям во втором классе такие вещи рассказывают.\nУчительница поставила ребенку двойку, заявив, что он фантазировал в домашнем задании. А правильный ответ: если к слову "бык" добавить "а", получится родительный падеж.\nЯ не планировал в таком раннем возрасте рассказывать сыну, что половина окружающих людей - идиоты, но, видимо, придется :-)',
-    4: 'у меня на балконе сосулька растет метровая, прямо над машиной, которая ссигналит каждую ночь. Я эту сосульку из распылителя подкармливаю.',
-    5: 'xx: Мне сейчас спам пришел "Я живу в доме напротив, вот моя ссылка *адрес ссылки*. Давай познакомимся". Я ответил, что живу напротив морга и меня пугают такие знакомства',
-    6: 'xxx: В командировке на съемной квартире нужна была марля, чтобы погладить футболку. Начал шариться по всем ящикам. Марлю не нашел, зато нашел ключ в шкафу между простынями. Вспомнил, что один ящик в этом шкафу был заперт. Попробовал открыть его найденным ключом. Открыл. Внутри нашел марлю. Не зря в квесты играл..'}
+LEXICON: dict[str, str] = {
+    'audio': '🎶 Аудио',
+    'text': '📃 Текст',
+    'photo': '🖼 Фото',
+    'video': '🎬 Видео',
+    'document': '📑 Документ',
+    'voice': '📢 Голосовое сообщение',
+    'text_1': 'Это обыкновенное текстовое сообщение, его можно легко отредактировать другим текстовым сообщением, но нельзя отредактировать сообщением с медиа.',
+    'text_2': 'Это тоже обыкновенное текстовое сообщение, которое можно заменить на другое текстовое сообщение через редактирование.',
+    'photo_id1': 'AgACAgIAAxkBAAICuGQM60xVP0YI233-o-IidzYHY7zNAAKSyTEbkFJpSLbelRrE-7iyAQADAgADcwADLwQ',
+    'photo_id2': 'AgACAgIAAxkBAAICumQM69Jy7Cb76_wdgraHjZciPsrbAAKUyTEbkFJpSCGgPQobSCiEAQADAgADcwADLwQ',
+    'voice_id1': 'AwACAgIAAxkBAAICwmQM7gqyuYQoxvDsTxd0pnJO4brPAALDKwACkFJpSD3oy2zaZR9CLwQ',
+    'voice_id2': 'AwACAgIAAxkBAAICxmQM7i4Tbi_1SZ7CJCiSD_8SGEebAALFKwACkFJpSC5-jy3sE-6ALwQ',
+    # 'audio_id1': 'CQACAgIAAxkBAAIVRWPKsPl83xynqlF9YvF5MRyF9GxeAAL1JAACkhBZSmyFCDY61yX8LQQ',
+    # 'audio_id2': 'CQACAgIAAxkBAAIVR2PKsXppkdhAnOlqwpOHDJivtfvJAAL4JAACkhBZSoMVyPSB59h5LQQ',
+    'document_id1': 'BQACAgIAAxkBAAICvGQM7GpxiMzsWpdQrG6psvlBnuUFAAK9KwACkFJpSJ4WfQeFvHLHLwQ',
+    'document_id2': 'BQACAgIAAxkBAAICvmQM7L8fyVGDZw4lBCDXcMGoMb9lAAK-KwACkFJpSD3CieGCweDSLwQ',
+    'video_id1': 'BAACAgIAAxkBAAICwGQM7ZNq0IWbBRyYHqMlHiLM9GG5AALBKwACkFJpSBTzFPBHLPGzLwQ',
+    'video_id2': 'BAACAgIAAxkBAAICxGQM7g2u8cPMGraA_6_N1vlY8I73AALEKwACkFJpSDdXFJv8vahvLwQ',
+    }
 
 
-# Функция, генерирующая случайное число в диапазоне от 1 до длины словаря jokes
-def random_joke() -> int:
-    return random.randint(1, len(jokes))
+# Функция для генерации клавиатур с инлайн-кнопками
+def get_markup(width: int, *args, **kwargs) -> InlineKeyboardMarkup:
+    # Инициализируем билдер
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    # Инициализируем список для кнопок
+    buttons: list[InlineKeyboardButton] = []
+    # Заполняем список кнопками из аргументов args и kwargs
+    if args:
+        for button in args:
+            buttons.append(InlineKeyboardButton(
+                text=LEXICON[button] if button in LEXICON else button,
+                callback_data=button))
+    if kwargs:
+        for button, text in kwargs.items():
+            buttons.append(InlineKeyboardButton(
+                text=text,
+                callback_data=button))
+    # Распаковываем список с кнопками в билдер методом row c параметром width
+    kb_builder.row(*buttons, width=width)
+    # Возвращаем объект инлайн-клавиатуры
+    return kb_builder.as_markup()
 
 
-# Этот хэндлер будет срабатывать на команды "/start" и "/joke"
-@dp.message(Command(commands=['start', 'joke']))
+# Этот хэндлер будет срабатывать на команду "/start"
+@dp.message(CommandStart())
 async def process_start_command(message: Message):
-    keyboard: list[list[InlineKeyboardButton]] = [
-        [InlineKeyboardButton(text='Хочу еще!', callback_data='more')]]
-    markup: InlineKeyboardMarkup = InlineKeyboardMarkup(
-        inline_keyboard=keyboard)
-    await message.answer(
-        text=jokes[random_joke()],
-        reply_markup=markup)
+    markup = get_markup(2, 'videoС')
+    await message.answer_document(
+                        document=LEXICON['video_id1'],
+                        caption='Это видео 1',
+                        reply_markup=markup)
 
 
-# Этот хэндлер будет срабатывать на нажатие кнопки "Хочу еще!"
-@dp.callback_query(Text(text='more'))
-async def process_more_press(callback: CallbackQuery):
-    keyboard: list[list[InlineKeyboardButton]] = [
-        [InlineKeyboardButton(text='Хочу еще!', callback_data='more')]]
-    markup: InlineKeyboardMarkup = InlineKeyboardMarkup(
-        inline_keyboard=keyboard)
-    print(callback)
-    # Редактируем сообщение
-    await callback.message.edit_text(
-        text=jokes[random_joke()],
-        reply_markup=markup)
+# Этот хэндлер будет срабатывать на нажатие инлайн-кнопки
+@dp.callback_query(Text(text=['text',
+                              'audio',
+                              'video',
+                              'document',
+                              'photo',
+                              'voice']))
+async def process_button_press(callback: CallbackQuery):
+    markup = get_markup(2, 'video')
+    try:
+        await bot.edit_message_media(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            media=InputMediaDocument(
+                media=LEXICON['video_id2'],
+                caption='Это video 2'),
+            reply_markup=markup)
+    except TelegramBadRequest:
+        await bot.edit_message_media(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            media=InputMediaDocument(
+                media=LEXICON['video_id1'],
+                caption='Это video 1'),
+            reply_markup=markup)
 
 
-# Этот хэндлер будет срабатывать на любые сообщения, кроме команд
+# Этот хэндлер будет срабатывать на все остальные сообщения
 @dp.message()
 async def send_echo(message: Message):
+    print(message)
     await message.answer(
-        text='Я даже представить себе не могу, '
-             'что ты имеешь в виду :(\n\n'
-             'Чтобы получить какую-нибудь шутку - '
-             'отправь команду /joke')
+            text='Не понимаю')
 
 
-# Запускаем поллинг
 if __name__ == '__main__':
     dp.run_polling(bot)
