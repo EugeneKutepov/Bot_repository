@@ -40,18 +40,20 @@ def read_direct_link(link:str):
     #print(url)
     html_text = requests.get(url, headers=user_agent).text
     soup = BeautifulSoup(html_text, 'lxml')
-    search_in = soup.find_all('p', align='justify')
+    search_in = soup.find_all('tbody')
+    print(search_in)
     #print(search_in)
     for element in (search_in):
-        #hrefs = str(element).split('"')
-        #print(hrefs)
-        # wrref = {}
-        # for i in range(len(hrefs)):
-        #     if 'ELEMENT_ID' in hrefs[i]:
-        #         word = hrefs[i+1].split('><')[1][2:-3]
-        #         wrref[word] = f'https://www.vsegei.ru{hrefs[i]}'
+        text = element.text
+            #hrefs = str(element).split('"')
+            #print(hrefs)
+            # wrref = {}
+            # for i in range(len(hrefs)):
+            #     if 'ELEMENT_ID' in hrefs[i]:
+            #         word = hrefs[i+1].split('><')[1][2:-3]
+            #         wrref[word] = f'https://www.vsegei.ru{hrefs[i]}'
 
-        return prepare_message(element.text)
+        return prepare_message(text)
         # print(element)
         # print(wrref)
         # print(element.text)
