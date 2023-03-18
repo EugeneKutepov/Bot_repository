@@ -41,11 +41,9 @@ def read_direct_link(link:str):
     html_text = requests.get(url, headers=user_agent).text
     soup = BeautifulSoup(html_text, 'lxml')
     search_in = soup.find_all('tbody')
-    print(type(search_in))
     #print(search_in)
     for element in (search_in):
         text = element.text.replace('\n\n\n\n', '')
-        print(text)
             #hrefs = str(element).split('"')
             #print(hrefs)
             # wrref = {}

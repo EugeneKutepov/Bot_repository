@@ -5,12 +5,15 @@ from keyboards.keyboards import create_kb_answer
 from lexicon.lexicon import LEXICON_RU, show_definition
 from services.services import parse_term, read_direct_link
 
+from db.db_operation import db_proc
+
 router: Router = Router()
 
 
 # Этот хэндлер срабатывает на команду /start
 @router.message(CommandStart())
 async def process_start_command(message: Message):
+    db_proc(message.from_user.id)
     await message.answer(text=LEXICON_RU['/start'])
 
 
@@ -23,6 +26,7 @@ async def process_help_command(message: Message):
 
 @router.message()
 async def process_yes_answer(message: Message):
+    db_proc(message.from_user.id)
     kbs = create_kb_answer(parse_term(message.text))
     if kbs:
         for kb in kbs:
