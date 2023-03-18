@@ -59,6 +59,7 @@ def read_direct_link(link:str):
 
 def parse_term(term):
     url = f'https://www.vsegei.ru/ru/public/sprav/geodictionary/geosearch.php?q={term}&s=Поиск'
+    print(term)
     html_text = requests.get(url, headers=user_agent).text
     soup = BeautifulSoup(html_text, 'lxml')
     search_in = soup.find_all('a', target='_blank', href=True)

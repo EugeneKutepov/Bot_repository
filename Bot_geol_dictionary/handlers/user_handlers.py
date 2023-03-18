@@ -26,8 +26,8 @@ async def process_help_command(message: Message):
 
 @router.message()
 async def process_yes_answer(message: Message):
-    db_proc(message.from_user.id)
     kbs = create_kb_answer(parse_term(message.text))
+    db_proc(message.from_user.id)
     if kbs:
         for kb in kbs:
             await message.answer(text="Результаты поиска:", reply_markup=kb)

@@ -10,8 +10,8 @@ def db_launch():
         json.dump(db, f)
 
 def db_proc(id:int):
-    if int(id) not in db_dict['users_id']:
-        db_dict['users_id'] = id
+    if id not in db_dict['users_id']:
+        db_dict['users_id'].append(id)
         with open('db/db_users.json', 'w') as f:
             json.dump(db_dict, f)
 
