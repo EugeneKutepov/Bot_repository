@@ -21,5 +21,4 @@ def create_kb_answer(list_terms:dict):
     if len(terms) !=0:
         kb = InlineKeyboardMarkup(inline_keyboard=terms)
         kbs.append(kb)
-    print(len(terms))
     return kbs
