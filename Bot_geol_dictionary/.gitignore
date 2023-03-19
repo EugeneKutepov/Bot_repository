@@ -1,4 +1,5 @@
 /venv/
 *.env
+*.json
 db/db_users.json
 .gitignore
