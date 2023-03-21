@@ -15,7 +15,10 @@ def db_proc(id:int):
         with open('db/db_users.json', 'w') as f:
             json.dump(db_dict, f)
 
+def db_loock():
+    print(len(db_dict['users_id']))
+
 
 
 if __name__ == '__main__':
-    db_launch()
+    db_loock()

@@ -4,6 +4,8 @@ import logging
 from aiogram import Bot, Dispatcher
 from config.config_data import Config, load_config
 from handlers import user_handlers
+from db.db_operation import db_dict
+
 
 
 # Инициализируем логгер
@@ -27,6 +29,10 @@ async def main():
     # Инициализируем бот и диспетчер
     bot: Bot = Bot(token=config.tg_bot.token)
     dp: Dispatcher = Dispatcher()
+
+    """Рабочая рассылка"""
+    # for id in db_dict['users_id']:
+    #     await bot.send_message(id, 'Hello')
 
     # Регистриуем роутеры в диспетчере
     dp.include_router(user_handlers.router)
