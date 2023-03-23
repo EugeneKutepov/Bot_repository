@@ -3,7 +3,7 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from config.config_data import Config, load_config
-from handlers import user_handlers
+from handlers import user_handlers, admin_handlers
 from db.db_operation import db_dict
 
 
@@ -35,6 +35,7 @@ async def main():
     #     await bot.send_message(id, 'Hello')
 
     # Регистриуем роутеры в диспетчере
+    dp.include_router(admin_handlers.router)
     dp.include_router(user_handlers.router)
     #dp.include_router(other_handlers.router)
 

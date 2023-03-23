@@ -23,7 +23,6 @@ async def process_help_command(message: Message):
     await message.answer(text=LEXICON_RU['/help'], parse_mode='HTML')
 
 
-
 @router.message()
 async def process_yes_answer(message: Message):
     kbs = create_kb_answer(parse_term(message.text))
